@@ -1,6 +1,9 @@
 <?php
-include("../cred.php");
-$dbname = "";
+include("/home/smartlis/public_html/dashboard/cred.php");
+$dbname = "smartlis_api";
+// var_dump($_POST);
+// var_dump($_SERVER);
+// echo $_SERVER["HTTP_AUTHORIZATION"];
 if($_SERVER["REQUEST_METHOD"] == "POST") {
   $key = str_replace("Bearer ", "", $_SERVER['HTTP_AUTHORIZATION']);
   try {
@@ -10,7 +13,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->execute();
     $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
     $d = $stmt->fetchAll();
-    if($stmt->rowCount() == 1) {
+    if($stmt->rowCount() >= 1) {
       include("../ratelimit.php");
       echo '{"success": true, "message": "API key exists! :D"}';
     }

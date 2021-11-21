@@ -1,18 +1,18 @@
 <?php
-include("../../../dashboard/cred.php");
-$dbname = "";
+include("/home/smartlis/public_html/dashboard/cred.php");
+$dbname = "smartlis_api";
 if($_SERVER["REQUEST_METHOD"] == "POST") {
   $key = str_replace("Bearer ", "", $_SERVER['HTTP_AUTHORIZATION']);
   try {
     $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $stmt = $conn->prepare("SELECT * FROM api_keys WHERE apiKey=".json_encode($key));
-    $stmt->execute();
+    $stmt = $conn->prepare("SELECT * FROM api_keys WHERE apiKey=:key");
+    $stmt->execute( array(":key" => $key) );
     $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
     $d = $stmt->fetchAll();
     if($stmt->rowCount() == 1) {
       include("../ratelimit.php");
-      $dbname = "bcxkspna_test";
+      $dbname = "smartlis_inv";
 
       $conn1 = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
       $conn1->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
