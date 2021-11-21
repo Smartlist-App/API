@@ -1,3 +1,3 @@
 # API
 API functionality for Smartlist
-Because transparency is cool 😎
+because transparency is cool 😎
