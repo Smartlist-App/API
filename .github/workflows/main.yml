@@ -1,0 +1,17 @@
+name: discord message
+on: [push]
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: Smartlist-App/checkout@master
+    - name: send message
+      uses: Smartlist-App/discord-action@master
+      with:
+        webhook_id: ${{ secrets.WEBHOOK_ID }}
+        webhook_token: ${{ secrets.WEBHOOK_TOKEN }}
+        color: "#48f442"
+        username: "GitHub"
+        message: "A new commit has been pushed to Smartlist-App/API"
