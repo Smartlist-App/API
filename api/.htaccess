@@ -1,0 +1,9 @@
+Header add Access-Control-Allow-Origin "*"
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+Header add Access-Control-Allow-Methods: "GET,POST,OPTIONS,DELETE,PUT"
+# Header set X-Frame-Options DENY
+Header always edit Set-Cookie (.*) "$1; SameSite=None; Secure"
+Header set Strict-Transport-Security "max-age=31536000" env=HTTPS
+RewriteEngine On
+RewriteCond %{THE_REQUEST} ^.*/index\.php 
+RewriteRule ^(.*)index.php$ /$1 [R=301,L]

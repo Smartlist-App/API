@@ -34,7 +34,7 @@ $userID = $d->fetchUserID($_POST['token']);
 try {
     $dbh = new PDO("mysql:host=" . App::server . ";dbname=" . App::database, App::user, App::password);
     $dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-    $sql = $dbh->prepare("UPDATE Inventory SET star = star ^ 1, lastUpdated=:date WHERE user = :user AND id = :id");
+    $sql = $dbh->prepare("UPDATE ".(isset($_POST['customRoom']) ? "CustomRoomItems":"Inventory")." SET star = star ^ 1, lastUpdated=:date WHERE user = :user AND id = :id");
     $sql->execute(array(
         ":user" => $userID,
         ":id" => $_POST['id'],

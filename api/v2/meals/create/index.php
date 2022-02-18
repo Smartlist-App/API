@@ -25,7 +25,7 @@ $data->error = null;
 $data->success = true;
 $userID = $d->fetchUserID($_POST['token']);
 
-$data->data = null;
+$data->data = new stdClass();
 
 try {
     $dbh = new PDO("mysql:host=" . App::server . ";dbname=" . App::database, App::user, App::password);
@@ -38,6 +38,7 @@ try {
         ":user" => $userID,
         ":type" => $_POST['type'],
     ));
+    $data->data->id = $dbh->lastInsertId();
 }
 catch (PDOException $e) {var_dump($e);}
 

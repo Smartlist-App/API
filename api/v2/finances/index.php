@@ -36,7 +36,7 @@ try {
     foreach($users as $row) {
         $e = new Encryption();
         $obj = new stdClass();
-        $obj->amount = $e->decrypt($row['amount']);
+        $obj->amount = intval($e->decrypt($row['amount']));
         $obj->date = $e->decrypt($row['date']);
         $obj->spentOn = $e->decrypt($row['categories']);
         $data->data[] = $obj;

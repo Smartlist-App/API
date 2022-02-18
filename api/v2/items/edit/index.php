@@ -31,7 +31,7 @@ $userID = $d->fetchUserID($_POST['token']);
 try {
     $dbh = new PDO("mysql:host=" . App::server . ";dbname=" . App::database, App::user, App::password);
     $dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-    $sql = $dbh->prepare("UPDATE Inventory SET name=:name, qty=:qty, category=:category, lastUpdated=:lastUpdated WHERE id=:id AND user=:user");
+    $sql = $dbh->prepare("UPDATE ".(isset($_POST['customRoom']) ? "CustomRoomItems":"Inventory")." SET name=:name, qty=:qty, category=:category, lastUpdated=:lastUpdated WHERE id=:id AND user=:user");
     $sql->execute(array(
         ":name" => $e->encrypt($_POST['name']),
         ":qty" => $e->encrypt($_POST['qty']),

@@ -17,8 +17,8 @@ if(!isset($_POST['token'])) {
     $data->error = "Invalid user token specified!";
     die(json_encode($data));
 }
-if(!isset($_POST['room'])) {
-    $data->error = "Room not specified";
+if(!isset($_POST['q'])) {
+    $data->error = "Query (q) not specified!";
     die(json_encode($data));
 }
 $data->error = null;
@@ -28,28 +28,32 @@ $userID = $d->fetchUserID($_POST['token']);
 try {
     $dbh = new PDO("mysql:host=" . App::server . ";dbname=" . App::database, App::user, App::password);
     $dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-    $sql = $dbh->prepare((!isset($_POST['custom-room']) ? 
-    "SELECT * FROM Inventory WHERE user = :id AND room = :room AND trash = 0 ORDER BY ID DESC":
-    "SELECT * FROM CustomRoomItems WHERE user = :id AND parent = :room AND trash = 0 ORDER BY ID DESC"
-    ));
+    $sql = $dbh->prepare("SELECT * FROM Inventory WHERE user = :id ORDER BY ID DESC");
     $sql->execute(array(
         ":id" => $userID,
-        ":room" => $_POST['room'],
     ));
     $data->data = [];    
     $users = $sql->fetchAll();
     foreach($users as $row) {
         $e = new Encryption();
-        $obj = new stdClass();
-        $obj->id = $row['id'];
-        $obj->lastUpdated = $row['lastUpdated'];
-        $obj->amount = $e->decrypt($row['qty']);
-        $obj->sync = $row['user'] == $userID ? 0 : 1;
-        $obj->title = $e->decrypt($row['name']);
-        $obj->categories = $e->decrypt($row['category']);
-        $obj->note = (isset($row['note']) && !empty($row['note']) ? $e->decrypt($row['note']):"");
-        $obj->star = $row['star'];
-        $data->data[] = $obj;
+        if(
+               str_contains(strtolower($e->decrypt($row['name'])), strtolower($_POST['q']))
+            || str_contains(strtolower($e->decrypt($row['qty'])), strtolower($_POST['q']))
+            || str_contains(strtolower((isset($row['note']) && !empty($row['note']) ? $e->decrypt($row['note']):"")), strtolower($_POST['q']))
+            || str_contains(strtolower($e->decrypt($row['category'])), strtolower($_POST['q']))
+        ) {
+            $obj = new stdClass();
+            $obj->id = $row['id'];
+            $obj->lastUpdated = $row['lastUpdated'];
+            $obj->amount = $e->decrypt($row['qty']);
+            $obj->sync = $row['user'] == $userID ? 0 : 1;
+            $obj->title = $e->decrypt($row['name']);
+            $obj->categories = $e->decrypt($row['category']);
+            $obj->note = (isset($row['note']) && !empty($row['note']) ? $e->decrypt($row['note']):"");
+            $obj->star = $row['star'];
+            $obj->room = $row['room'];
+            $data->data[] = $obj;
+        }
     }
 }
 catch (PDOException $e) {var_dump($e);}
