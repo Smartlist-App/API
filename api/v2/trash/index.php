@@ -2,11 +2,10 @@
 ini_set("display_errors", 1);
 
 $data = new stdClass();
-require '/home/smartlist.ga/smartlist.tech/app/cred.php';
-require '/home/smartlist.ga/api.smartlist.tech/v2/header.php';
-require '/home/smartlist.ga/smartlist.tech/app/encrypt.php';
-require '/home/smartlist.ga/smartlist.tech/app/userdata.php';
-$e = new Encryption();
+require '/home/smartlist/domains/smartlist.tech/private_html/app/cred.php';
+require '/home/smartlist/domains/smartlist.tech/private_html/app/encrypt.php';
+require '/home/smartlist/domains/smartlist.tech/private_html/api/v2/header.php';
+
 
 $data->error = "Cannot ".$_SERVER['REQUEST_METHOD']." ".__FILE__;
 $data->data = null;
@@ -37,8 +36,8 @@ try {
     foreach($users as $row) {
         $obj = new stdClass();
         $obj->id = intval($row['id']);
-        $obj->title = $e->decrypt($row['name']);
-        $obj->amount = $e->decrypt($row['qty']);
+        $obj->title = Encryption::decrypt($row['name']);
+        $obj->amount = Encryption::decrypt($row['qty']);
         $obj->room = $row['room'];
         $data->data[] = $obj;
     }

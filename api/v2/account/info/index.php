@@ -2,29 +2,22 @@
 ini_set("display_errors", 1);
 
 $data = new stdClass();
-require '/home/smartlist.ga/smartlist.tech/app/cred.php';
-require '/home/smartlist.ga/api.smartlist.tech/v2/header.php';
-require '/home/smartlist.ga/smartlist.tech/app/encrypt.php';
-require '/home/smartlist.ga/smartlist.tech/app/userdata.php';
-
-$data->error = "Cannot ".$_SERVER['REQUEST_METHOD']." ".__FILE__;
 $data->data = null;
 $data->success = false;
 $data->method = $_SERVER['REQUEST_METHOD'];
+require '/home/smartlist/domains/smartlist.tech/private_html/app/cred.php';
+require '/home/smartlist/domains/smartlist.tech/private_html/app/encrypt.php';
+require '/home/smartlist/domains/smartlist.tech/private_html/api/v2/header.php';
+
+$data->error = "Cannot ".$_SERVER['REQUEST_METHOD']." ".__FILE__;
+
 if($_SERVER['REQUEST_METHOD'] !== "POST") die(json_encode($data));
 
-$d = new APIVerification();
-// if($d->verify(Token) === false) {
-//     $data->error = "Invalid API key";
-//     die(json_encode($data));
-// }
-if(!isset($_POST['token'])) {
-    $data->error = "Invalid user token specified!";
-    die(json_encode($data));
-}
+APIVerification::requireParams(['token']);
+
 $data->error = null;
 $data->success = true;
-$userID = $d->fetchUserID($_POST['token']);
+$userID = APIVerification::fetchUserID($_POST['token']);
 
 $themes = array();
 
@@ -38,7 +31,6 @@ try {
     $users = $sql->fetchAll();
     foreach($users as $user) {
         $data->data = new stdClass();
-        $e = new Encryption();
         switch($user['theme']) {
             case "c62828": 
                 // Red
@@ -122,9 +114,9 @@ try {
                 break;
         }
         $data->data->id = $user['id'];
-        $data->data->email = $e->decrypt($user['email']);
-        $data->data->name = $e->decrypt($user['name']);
-        $data->data->financePlan = $e->decrypt($user['financePlan']);
+        $data->data->email = Encryption::decrypt($user['email']);
+        $data->data->name = Encryption::decrypt($user['name']);
+        $data->data->financePlan = Encryption::decrypt($user['financePlan']);
         $data->data->image = $user['image'];
         $data->data->notificationMin = intval($user['notificationMin']);
         $data->data->budget = intval($user['budget']);
@@ -133,7 +125,7 @@ try {
         $data->data->defaultPage = $user['defaultPage'];
         $data->data->studentMode = $user['studentMode'];
         $data->data->familyCount = $user['familyCount'];
-        $data->data->houseName = $e->decrypt($user['houseName']);
+        $data->data->houseName = Encryption::decrypt($user['houseName']);
         $data->data->currency = $user['currency'];
         $data->data->theme = $themes;
     }

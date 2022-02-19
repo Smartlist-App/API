@@ -2,10 +2,9 @@
 ini_set("display_errors", 1);
 
 $data = new stdClass();
-require '/home/smartlist.ga/smartlist.tech/app/cred.php';
-require '/home/smartlist.ga/api.smartlist.tech/v2/header.php';
-require '/home/smartlist.ga/smartlist.tech/app/encrypt.php';
-require '/home/smartlist.ga/smartlist.tech/app/userdata.php';
+require '/home/smartlist/domains/smartlist.tech/private_html/app/cred.php';
+require '/home/smartlist/domains/smartlist.tech/private_html/app/encrypt.php';
+require '/home/smartlist/domains/smartlist.tech/private_html/api/v2/header.php';
 
 $data->error = "Cannot ".$_SERVER['REQUEST_METHOD']." ".__FILE__;
 $data->data = null;
@@ -27,15 +26,13 @@ $data->error = null;
 $data->success = true;
 $userID = $d->fetchUserID($_POST['token']);
 
-$e = new Encryption();
-
 try {
     $dbh = new PDO("mysql:host=" . App::server . ";dbname=" . App::database, App::user, App::password);
     $dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
     $sql = $dbh->prepare("UPDATE Notes SET title=:title, content=:content WHERE id=:id AND user=:user");
     $sql->execute(array(
-        ":title" => $e->encrypt($_POST['title']),
-        ":content" => $e->encrypt($_POST['content']),
+        ":title" => Encryption::encrypt($_POST['title']),
+        ":content" => Encryption::encrypt($_POST['content']),
         ":user" => $userID,
         ":id" => $_POST['id']
     ));
