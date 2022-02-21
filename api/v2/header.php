@@ -1,5 +1,4 @@
 <?php
-ini_set("display_errors", 1);
 header("Content-Type: application/json");
 
 class ApiVerification extends App
@@ -33,6 +32,11 @@ class ApiVerification extends App
          foreach ($tokens as $token) {
             $data = $token['user'];
          }
+         if($data == -1) {
+            $GLOBALS['data']->success = false;
+            $GLOBALS['data']->error = "USER ID not found";
+            die(json_encode($GLOBALS['data']));
+         }
          return $data;
       } catch (PDOException $e) {
          var_dump($e);
@@ -46,6 +50,21 @@ class ApiVerification extends App
             die(json_encode($GLOBALS['data']));
          }
       }
+   }
+   public static function allowRequestMethods($arr)
+   {
+      $GLOBALS['data']->method = $_SERVER['REQUEST_METHOD'];
+      if(!in_array($_SERVER['REQUEST_METHOD'], $arr)) {
+           $GLOBALS['data']->error = "Cannot ".$_SERVER['REQUEST_METHOD']." ".__FILE__;
+           die(json_encode($GLOBALS['data']));
+      }
+   }
+   public static function output($data) {
+       die(json_encode($data));
+   }
+   public static function error($data) {
+       $GLOBALS['data']->error = $data;
+       die(json_encode($GLOBALS['data']));
    }
 }
 
