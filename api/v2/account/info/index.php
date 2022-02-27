@@ -18,9 +18,7 @@ try {
     $dbh = new PDO("mysql:host=" . App::server . ";dbname=" . App::database, App::user, App::password);
     $dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
     $sql = $dbh->prepare("SELECT * FROM Accounts WHERE id = :id");
-    $sql->execute([
-        ":id" => UserID
-    ]);
+    $sql->execute([":id" => UserID]);
     $users = $sql->fetchAll();
     foreach($users as $user) {
         switch($user['theme']) {
@@ -116,6 +114,7 @@ try {
             "budget" => intval($user['budget']),
             "onboarding" => intval($user['onboarding']),
             "verifiedEmail" => $user['verifiedEmail'],
+            "purpose" => $user['purpose'],
             "defaultPage" => $user['defaultPage'],
             "studentMode" => $user['studentMode'],
             "familyCount" => $user['familyCount'],

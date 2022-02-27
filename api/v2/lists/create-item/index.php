@@ -8,7 +8,7 @@ $data->data = null;
 $data->error = null;
 
 API::allowRequestMethods(["POST"]);
-API::requireParams(['token', 'parent']);
+API::requireParams(['token', 'parent', 'description', 'title']);
 define('UserID', API::fetchUserID($_POST['token']));
 
 $data->success = true;
@@ -17,21 +17,19 @@ $data->data = [];
 try {
     $dbh = new PDO("mysql:host=" . App::server . ";dbname=" . App::database, App::user, App::password);
     $dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-    $sql = $dbh->prepare("SELECT * FROM ListItems WHERE parent = :id AND user=:user ORDER BY ID ASC");
+    $sql = $dbh->prepare("INSERT INTO ListItems (parent, user, title, description) VALUES (:parent, :user, :title, :description)");
     $sql->execute(array(
-        ":user" => UserID,
-        ":id" => $_POST['parent']
+        ":parent" => intval($_POST['parent']),
+        ":title" => Encryption::encrypt($_POST['title']),
+        ":description" => Encryption::encrypt($_POST['description']),
+        ":user" => UserID
     ));
-    $data->data = [];    
-    $users = $sql->fetchAll();
-    foreach($users as $row) {
-        $obj = new stdClass();
-        $obj->id = $row['id'];
-        $obj->title = Encryption::decrypt($row['title']);
-        $obj->description = Encryption::decrypt($row['description']);
-        $data->data[] = $obj;
+    $data->data = "Created \"".htmlspecialchars($_POST['name'])."\" in ".htmlspecialchars($_POST['room']);
+    if(isset($_POST['parent'])) {
+        $data->data = "Created item!";
     }
 }
-catch (PDOException $e) {API::error($e);}
+catch (PDOException $e) {var_dump($e);}
 
-API::output($data);
+echo json_encode($data);
+?>
