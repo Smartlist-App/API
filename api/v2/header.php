@@ -33,8 +33,8 @@ class ApiVerification extends App
             $data = $token['user'];
          }
          if($data == -1) {
-            $GLOBALS['data']->success = false;
-            $GLOBALS['data']->error = "USER ID not found";
+            $GLOBALS['data']['success'] = false;
+            $GLOBALS['data']['error'] = "USER ID not found";
             die(json_encode($GLOBALS['data']));
          }
          return $data;
@@ -46,16 +46,16 @@ class ApiVerification extends App
    {
       foreach ($arr as $d) {
          if (!isset($_POST[$d])) {
-            $GLOBALS['data']->error = "Missing parameter: `" . $d . "`";
+            $GLOBALS['data']['error'] = "Missing parameter: `" . $d . "`";
             die(json_encode($GLOBALS['data']));
          }
       }
    }
    public static function allowRequestMethods($arr)
    {
-      $GLOBALS['data']->method = $_SERVER['REQUEST_METHOD'];
+      $GLOBALS['data']['method'] = $_SERVER['REQUEST_METHOD'];
       if(!in_array($_SERVER['REQUEST_METHOD'], $arr)) {
-           $GLOBALS['data']->error = "Cannot ".$_SERVER['REQUEST_METHOD']." ".__FILE__;
+           $GLOBALS['data']['error'] = "Cannot ".$_SERVER['REQUEST_METHOD']." ".__FILE__;
            die(json_encode($GLOBALS['data']));
       }
    }
@@ -63,8 +63,18 @@ class ApiVerification extends App
        die(json_encode($data));
    }
    public static function error($data) {
-       $GLOBALS['data']->error = $data;
+       $GLOBALS['data']['error'] = $data;
        die(json_encode($GLOBALS['data']));
+   }
+   public static function init() {
+       $GLOBALS['data'] = [
+           "error" => null,
+           "data" => null,
+           "success" => false,
+       ];
+   }
+   public static function set($key, $value) {
+       $GLOBALS['data'][$key] = $value;
    }
 }
 

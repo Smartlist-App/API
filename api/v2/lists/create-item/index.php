@@ -1,35 +1,31 @@
 <?php
-require '/home/smartlist/domains/smartlist.tech/private_html/app/cred.php';
-require '/home/smartlist/domains/smartlist.tech/private_html/app/encrypt.php';
-require '/home/smartlist/domains/smartlist.tech/private_html/api/v2/header.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/app/cred.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/app/encrypt.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/api/v2/header.php';
 
-$data = new stdClass();
-$data->data = null;
-$data->error = null;
-
+API::init();
 API::allowRequestMethods(["POST"]);
 API::requireParams(['token', 'parent', 'description', 'title']);
-define('UserID', API::fetchUserID($_POST['token']));
+API::set('success', true);
 
-$data->success = true;
-$data->data = [];
+define('UserID', API::fetchUserID($_POST['token']));
 
 try {
     $dbh = new PDO("mysql:host=" . App::server . ";dbname=" . App::database, App::user, App::password);
     $dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
     $sql = $dbh->prepare("INSERT INTO ListItems (parent, user, title, description) VALUES (:parent, :user, :title, :description)");
-    $sql->execute(array(
+    $sql->execute([
         ":parent" => intval($_POST['parent']),
         ":title" => Encryption::encrypt($_POST['title']),
         ":description" => Encryption::encrypt($_POST['description']),
         ":user" => UserID
-    ));
-    $data->data = "Created \"".htmlspecialchars($_POST['name'])."\" in ".htmlspecialchars($_POST['room']);
-    if(isset($_POST['parent'])) {
-        $data->data = "Created item!";
-    }
+    ]);
+    $data['data'] = [
+        'id' => $dbh->lastInsertId(),
+        'title' => $_POST['title'],
+        'description' => $_POST['description']
+    ];
 }
-catch (PDOException $e) {var_dump($e);}
+catch (PDOException $e) {API::error($e);}
 
-echo json_encode($data);
-?>
+API::output($data);

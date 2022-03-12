@@ -1,39 +1,33 @@
 <?php
-require '/home/smartlist/domains/smartlist.tech/private_html/app/cred.php';
-require '/home/smartlist/domains/smartlist.tech/private_html/app/encrypt.php';
-require '/home/smartlist/domains/smartlist.tech/private_html/api/v2/header.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/app/cred.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/app/encrypt.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/api/v2/header.php';
 
-$data = new stdClass();
-$data->data = null;
-$data->error = null;
-
+API::init();
 API::allowRequestMethods(["POST"]);
 API::requireParams(['token']);
-define('UserID', API::fetchUserID($_POST['token']));
+API::set('success', true);
 
-$data->success = true;
-$data->data = [];
+define('UserID', API::fetchUserID($_POST['token']));
 
 try {
     $dbh = new PDO("mysql:host=" . App::server . ";dbname=" . App::database, App::user, App::password);
     $dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
     $sql = $dbh->prepare("SELECT * FROM Meals WHERE user = :user ORDER BY ID ASC");
-    $sql->execute([
-        ":user" => UserID
-    ]);
+    $sql->execute([ ":user" => UserID ]);
     $users = $sql->fetchAll();
+    $data['data'] = [];
     foreach($users as $row) {
-        $obj = new stdClass();
-        $obj->id = intval($row['id']);
-        $obj->title = $row['title'];
-        $obj->start = $row['start'];
-        $obj->end = $row['end'];
-        $obj->type = $row['type'];
-        $obj->foodId = $row['id'];
-        $data->data[] = $obj;
+        $data['data'][] = [
+            'id' => intval($row['id']),
+            'title' => $row['title'],
+            'start' => $row['start'],
+            'end' => $row['end'],
+            'type' => $row['type'],
+            'foodId' => $row['id']
+        ];
     }
 }
-catch (PDOException $e) {var_dump($e);}
+catch (PDOException $e) {API::error($e);}
 
-echo json_encode($data);
-?>
+API::output($data);

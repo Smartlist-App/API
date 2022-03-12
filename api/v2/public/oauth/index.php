@@ -1,16 +1,12 @@
 <?php
-ini_set('display_errors', 1);
-require '/home/smartlist/domains/smartlist.tech/private_html/app/cred.php';
-require '/home/smartlist/domains/smartlist.tech/private_html/app/encrypt.php';
-require '/home/smartlist/domains/smartlist.tech/private_html/api/v2/header.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/app/cred.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/app/encrypt.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/api/v2/header.php';
 
-$data = new stdClass();
-$data->data = null;
-$data->error = null;
-$data->success = false;
-
+API::init();
 API::allowRequestMethods(["POST"]);
 API::requireParams(['token', 'appId', 'secret']);
+API::set('success', true);
 
 try {
     $dbh = new PDO("mysql:host=" . App::server . ";dbname=smartlist_api", App::user, App::password);
@@ -24,26 +20,26 @@ try {
         $sql->execute([":id" => $_POST['appId'], ":secret" => $_POST['secret']]);
         $apps = $sql->fetchAll();
         if(count($apps) !== 1) {
-            $data->error = "Invalid AppId / AppSecret";
+            $data['error'] = "Invalid AppId / AppSecret";
             API::output($data);
         }
         if($users[0]['appid'] !== $_POST['appId']) {
-            $data->error = "AppId does not match user token";
+            $data['error'] = "AppId does not match user token";
             API::output($data);
         }
-        $data->success = true;
-        $data->data = json_decode(Encryption::decrypt($users[0]['data']));
-        unset($data->data->income);
-        unset($data->data->financePlan);
-        unset($data->data->notificationMin);
-        unset($data->data->houseName);
-        unset($data->data->familyCount);
-        unset($data->data->defaultPage);
-        unset($data->data->budget);
-        unset($data->data->onboarding);
+        $data['success'] = true;
+        $data['data'] = json_decode(Encryption::decrypt($users[0]['data']));
+        unset($data['data']->income);
+        unset($data['data']->financePlan);
+        unset($data['data']->notificationMin);
+        unset($data['data']->houseName);
+        unset($data['data']->familyCount);
+        unset($data['data']->defaultPage);
+        unset($data['data']->budget);
+        unset($data['data']->onboarding);
 
         // Provide a more friendly ID
-        $data->data->id = hash('whirlpool', md5($data->data->id));
+        $data['data']->id = hash('whirlpool', md5($data['data']->id ));
 
         $sql = $dbh->prepare("DELETE FROM UserTokens WHERE token = :token");
         $sql->execute([":token" => $_POST['token']]);

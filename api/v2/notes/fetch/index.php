@@ -1,18 +1,14 @@
 <?php
-require '/home/smartlist/domains/smartlist.tech/private_html/app/cred.php';
-require '/home/smartlist/domains/smartlist.tech/private_html/app/encrypt.php';
-require '/home/smartlist/domains/smartlist.tech/private_html/api/v2/header.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/app/cred.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/app/encrypt.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/api/v2/header.php';
 
-$data = new stdClass();
-$data->data = null;
-$data->error = null;
-
+API::init();
 API::allowRequestMethods(["POST"]);
-API::requireParams(['token']);
-define('UserID', API::fetchUserID($_POST['token']));
+API::requireParams(['token', 'id']);
+API::set('success', true);
 
-$data->success = true;
-$data->data = [];
+define('UserID', API::fetchUserID($_POST['token']));
 
 try {
     $dbh = new PDO("mysql:host=" . App::server . ";dbname=" . App::database, App::user, App::password);
@@ -24,13 +20,12 @@ try {
     ]);
     $users = $sql->fetchAll();
     foreach($users as $row) {
-        $e = new Encryption();
         $obj = new stdClass();
         $obj->id = intval($row['id']);
         $obj->title = Encryption::decrypt($row['title']);
         $obj->banner = $row['banner'] == "" ? "" : Encryption::decrypt($row['banner']);
         $obj->content = json_decode(Encryption::decrypt($row['content']));
-        $data->data = $obj;
+        $data['data'] = $obj;
     }
 }
 catch (PDOException $e) {API::error($e);}

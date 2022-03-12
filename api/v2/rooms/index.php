@@ -1,18 +1,14 @@
 <?php
-require '/home/smartlist/domains/smartlist.tech/private_html/app/cred.php';
-require '/home/smartlist/domains/smartlist.tech/private_html/app/encrypt.php';
-require '/home/smartlist/domains/smartlist.tech/private_html/api/v2/header.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/app/cred.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/app/encrypt.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/api/v2/header.php';
 
-$data = new stdClass();
-$data->data = null;
-$data->error = null;
-
+API::init();
 API::allowRequestMethods(["POST"]);
 API::requireParams(['token']);
-define('UserID', API::fetchUserID($_POST['token']));
+API::set('success', true);
 
-$data->success = true;
-$data->data = [];
+define('UserID', API::fetchUserID($_POST['token']));
 
 try {
     $dbh = new PDO("mysql:host=" . App::server . ";dbname=" . App::database, App::user, App::password);
@@ -21,13 +17,13 @@ try {
     $sql->execute([
         ":id" => UserID
     ]);
-    $data->data = [];    
+    $data['data'] = [];    
     $users = $sql->fetchAll();
     foreach($users as $row) {
         $obj = new stdClass();
         $obj->name = $row['name'];
         $obj->id = $row['id'];
-        $data->data[] = $obj;
+        $data['data'][] = $obj;
     }
 }
 catch (PDOException $e) {API::error($e);}

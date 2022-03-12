@@ -1,17 +1,13 @@
 <?php
-require '/home/smartlist/domains/smartlist.tech/private_html/app/cred.php';
-require '/home/smartlist/domains/smartlist.tech/private_html/app/encrypt.php';
-require '/home/smartlist/domains/smartlist.tech/private_html/api/v2/header.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/app/cred.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/app/encrypt.php';
+require dirname($_SERVER['DOCUMENT_ROOT']).'/api/v2/header.php';
 
-$data = new stdClass();
-$data->data = null;
-$data->error = null;
-$data->success = false;
-
+API::init();
 API::allowRequestMethods(["POST"]);
 API::requireParams(['token']);
+API::set('success', true);
 
-$data->success = true;
 define('UserID', API::fetchUserID($_POST['token']));
 
 try {
@@ -103,13 +99,13 @@ try {
                 ];
                 break;
         }
-        $data->data = [
+        $data['data'] = [
             "id" => $user['id'],
             "email" => Encryption::decrypt($user['email']),
             "email" => Encryption::decrypt($user['email']),
             "name" => Encryption::decrypt($user['name']),
             "financePlan" => Encryption::decrypt($user['financePlan']),
-            "image" => $user['image'],
+            "image" => Encryption::decrypt($user['image']),
             "notificationMin" => intval($user['notificationMin']),
             "budget" => intval($user['budget']),
             "onboarding" => intval($user['onboarding']),
@@ -117,6 +113,7 @@ try {
             "purpose" => $user['purpose'],
             "defaultPage" => $user['defaultPage'],
             "studentMode" => $user['studentMode'],
+            "financeToken" => $user['FinanceToken'],
             "familyCount" => $user['familyCount'],
             "houseName" => Encryption::decrypt($user['houseName']),
             "currency" => $user['currency'],
