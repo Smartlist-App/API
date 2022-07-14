@@ -19,12 +19,17 @@ try {
     ]);
     $users = $sql->fetchAll();
     foreach($users as $row) {
-        $obj = new stdClass();
-        $obj->id = intval($row['id']);
-        $obj->title = Encryption::decrypt($row['name']);
-        $obj->amount = Encryption::decrypt($row['qty']);
-        $obj->room = $row['room'];
-        $data['data'][] = $obj;
+        $data['data'][] = [
+         "id" => $row['id'],
+         "lastUpdated" => $row['lastUpdated'],
+         "amount" => Encryption::decrypt($row['qty']),
+         "sync" => $row['user'] == UserID ? 0 : 1,
+         "title" => Encryption::decrypt($row['name']),
+         "categories" => json_decode(Encryption::decrypt($row['category'])),
+         "note" => (isset($row['note']) && !empty($row['note']) ? Encryption::decrypt($row['note']) : ""),
+         "star" => $row['star'],
+         "room" => $row['room']
+      ];
     }
 }
 catch (PDOException $e) {API::error($e);}

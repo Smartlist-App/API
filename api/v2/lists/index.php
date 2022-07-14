@@ -18,11 +18,17 @@ try {
     $data['data'] = [];    
     $users = $sql->fetchAll();
     foreach($users as $row) {
+        $sql = $dbh->prepare("SELECT COUNT(title) FROM `ListItems` WHERE parent = :parent");
+        $sql->execute(array(
+            ":parent" => $row['id'],
+        ));
+        $res = $sql->fetchAll();
         $data['data'][] = [
             "id" => $row['id'],
             "title" => $row['title'],
             "description" => $row['description'],
-            "star" => $row['star']
+            "star" => $row['star'],
+            "count" => $res[0]['COUNT(title)']
         ];
     }
 }

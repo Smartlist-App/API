@@ -5,7 +5,7 @@ require dirname($_SERVER['DOCUMENT_ROOT']).'/api/v2/header.php';
 
 API::init();
 API::allowRequestMethods(["POST"]);
-API::requireParams(['token', 'parent']);
+API::requireParams(['token']);
 API::set('success', true);
 
 define('UserID', API::fetchUserID($_POST['token']));
@@ -13,18 +13,15 @@ define('UserID', API::fetchUserID($_POST['token']));
 try {
     $dbh = new PDO("mysql:host=" . App::server . ";dbname=" . App::database, App::user, App::password);
     $dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-    $sql = $dbh->prepare("SELECT * FROM ListItems WHERE parent = :id AND user=:user ORDER BY ID ASC");
-    $sql->execute(array(
-        ":user" => UserID,
-        ":id" => $_POST['parent']
-    ));
-    $data['data'] = [];    
+    $sql = $dbh->prepare("SELECT * FROM UserTokens WHERE user = :id ORDER BY id DESC");
+    $sql->execute([":id" => UserID]);
     $users = $sql->fetchAll();
-    foreach($users as $row) {
+    $data['data'] = [];
+    foreach($users as $user) {
         $data['data'][] = [
-            'id' => $row['id'],
-            'title' => Encryption::decrypt($row['title']),
-            'description' => Encryption::decrypt($row['description'])
+            "id" => intval($user['id']),
+            "token" => $user['token'],
+            "user" => intval($user['user']),
         ];
     }
 }

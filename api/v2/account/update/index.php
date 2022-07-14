@@ -9,7 +9,7 @@ API::requireParams(['token', 'data']);
 API::set('success', true);
 define('UserID', API::fetchUserID($_POST['token']));
 
-$allowedValues = ['name', 'email', 'image', 'houseName', 'familyCount', 'studentMode', 'defaultPage', 'purpose', 'theme'];
+$allowedValues = ['name', 'email', 'image', 'houseName', 'familyCount', 'studentMode', 'defaultPage', 'purpose', 'theme', 'financeToken', 'financePlan', 'darkMode', 'budgetDaily', 'budgetMonthly', 'budgetWeekly', 'SyncToken'];
 $values = json_decode($_POST['data']);
 
 foreach(get_object_vars($values) as $key=>$value) {
@@ -26,7 +26,7 @@ try {
     foreach(get_object_vars($values) as $key=>$value) {
         $sql = $dbh->prepare("UPDATE Accounts SET ".$key." = :value WHERE id = :id");
         
-        if($key == "name" || $key == "email" || $key == "houseName" || $key == "image") {
+        if($key == "name" || $key == "email" || $key == "houseName" || $key == "image" || $key == "SyncToken") {
             $value = Encryption::encrypt($value);
         }
 

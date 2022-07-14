@@ -5,28 +5,20 @@ require dirname($_SERVER['DOCUMENT_ROOT']).'/api/v2/header.php';
 
 API::init();
 API::allowRequestMethods(["POST"]);
-API::requireParams(['token', 'parent']);
+API::requireParams(['token', 'name']);
 API::set('success', true);
 
 define('UserID', API::fetchUserID($_POST['token']));
-
 try {
     $dbh = new PDO("mysql:host=" . App::server . ";dbname=" . App::database, App::user, App::password);
     $dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-    $sql = $dbh->prepare("SELECT * FROM ListItems WHERE parent = :id AND user=:user ORDER BY ID ASC");
-    $sql->execute(array(
+    $sql = $dbh->prepare("INSERT INTO Rooms (name, user) VALUES (:name, :user)");
+    $sql->execute([
         ":user" => UserID,
-        ":id" => $_POST['parent']
-    ));
-    $data['data'] = [];    
-    $users = $sql->fetchAll();
-    foreach($users as $row) {
-        $data['data'][] = [
-            'id' => $row['id'],
-            'title' => Encryption::decrypt($row['title']),
-            'description' => Encryption::decrypt($row['description'])
-        ];
-    }
+        ":name" => $_POST['name'],
+    ]);
+    $data['data']['name'] = $_POST['name'];
+    $data['data']['id'] = $dbh->lastInsertId();
 }
 catch (PDOException $e) {API::error($e);}
 

@@ -3,15 +3,15 @@ require '/home/smartlist/domains/smartlist.tech/private_html/app/cred.php';
 require '/home/smartlist/domains/smartlist.tech/private_html/app/encrypt.php';
 require '/home/smartlist/domains/smartlist.tech/private_html/api/v2/header.php';
 
-$data = new stdClass();
-$data->data = null;
-$data->error = null;
+$data = array();
+$data['data'] = null;
+$data['error'] = null;
 
 API::allowRequestMethods(["POST"]);
 API::requireParams(['token', 'description', 'title', 'star']);
 define('UserID', API::fetchUserID($_POST['token']));
 
-$data->success = true;
+$data['success'] = true;
 
 try {
     $dbh = new PDO("mysql:host=" . App::server . ";dbname=" . App::database, App::user, App::password);
@@ -23,10 +23,11 @@ try {
         ":description" => $_POST['description'],
         ":star" => intval($_POST['star'])
     ]);
-    $data->data = new stdClass();
-    $data->data->id = $dbh->lastInsertId();
-    $data->data->title = $_POST['title'];
-    $data->data->description = $_POST['description'];
+    $data['data'] = [
+        'id' => $dbh->lastInsertId(),
+        'title' => $_POST['title'],
+        'description' => $_POST['description']
+    ];
 }
 catch (PDOException $e) {API::error($e);}
 

@@ -43,7 +43,7 @@ try {
          "amount" => Encryption::decrypt($row['qty']),
          "sync" => $row['user'] == UserID ? 0 : 1,
          "title" => Encryption::decrypt($row['name']),
-         "categories" => Encryption::decrypt($row['category']),
+         "categories" => json_decode(Encryption::decrypt($row['category'])),
          "note" => (isset($row['note']) && !empty($row['note']) ? Encryption::decrypt($row['note']) : ""),
          "star" => $row['star'],
          "room" => $row['room']

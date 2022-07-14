@@ -29,13 +29,11 @@ try {
         }
         $data['success'] = true;
         $data['data'] = json_decode(Encryption::decrypt($users[0]['data']));
-        unset($data['data']->income);
         unset($data['data']->financePlan);
         unset($data['data']->notificationMin);
         unset($data['data']->houseName);
         unset($data['data']->familyCount);
         unset($data['data']->defaultPage);
-        unset($data['data']->budget);
         unset($data['data']->onboarding);
 
         // Provide a more friendly ID
